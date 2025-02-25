@@ -1,0 +1,138 @@
+﻿
+@{
+    ViewBag.Title = "TimeTableCreation";
+}
+
+<script src="~/Scripts/jqGrid/jquery.jqGrid.js"></script>
+<script src="~/Scripts/jqGrid/jquery.jqGrid.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+   
+        $("#btnSubmit").click(function () {
+            
+            if ($("#txtWorkingDays").val().trim() == "") {
+                alert('Please enter Working Day Per Week.');
+                return;
+            }
+            if ($("#txtSubjectPerDay").val().trim() == "") {
+                alert('Please enter Subject Per Day.');
+                return;
+            }
+            if ($("#txtTotalSubject").val().trim() == "") {
+                alert('Please enter Total Subject.');
+                return;
+            }
+
+            var TotalWorkingDays = $("#txtWorkingDays").val().trim();
+            var SubjectPerDay = $("#txtSubjectPerDay").val().trim();
+            var TotalSubject = $("#txtTotalSubject").val().trim();
+                
+
+            $.ajax({
+                type: "POST",
+                url: '../TTMS/SubmitTotalHoursForTimeTable',
+                data: {
+                    TotalWorkingDays: TotalWorkingDays,
+                    SubjectPerDay: SubjectPerDay,
+                    TotalSubject: TotalSubject
+                },
+                datatype: "json",
+                success: function (response) {
+                    var dt = JSON.parse(response.state);
+                    if (dt.length > 0) {
+                        alert("Save Detail Successfully.");
+                        var TotalHours = dt[0]["TotalHours"];
+                        window.location.href = "../TTMS/GenerateTimeTable";
+                    }
+                    else {
+                        alert("Error in Process.");
+                        return;
+                    }
+                }
+            })
+            
+            
+        });
+
+    });
+
+    function updateTotalHours() {
+        var workingDays = parseInt($("#txtWorkingDays").val() || 0 );
+        var subjectsPerDay = parseInt($("#txtSubjectPerDay").val() || 0);
+        var totalHours = workingDays * subjectsPerDay;
+
+        $("#txtTotalHours").html("Total Hours For week is " + totalHours);
+    }
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode == 8 || charCode == 46) {
+            return true;
+        }
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        if (charCode < 48 || charCode > 57) {
+            return false;
+        }
+        return true;
+    }
+
+
+</script>
+
+
+
+
+
+<br />
+
+@using (Html.BeginForm())
+{
+
+
+    <div class="panel panel-default">
+        <div class="panel panel-heading">
+            Generate Time Table
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-2">
+                    Working Day Per Week.<i style="color: red; font-weight:bolder; font-size:medium;">*</i>
+                </div>
+                <div class="col-sm-2">
+                    <input id="txtWorkingDays" type="text" class="form-control" maxlength="1" max="7" onkeyup="updateTotalHours();" onkeypress="return isNumber(event)"/>
+                </div>
+                <div class="col-sm-2">
+                    Subject Per Day.<i style="color: red; font-weight:bolder; font-size:medium;">*</i>
+                </div>
+                <div class="col-sm-2">
+                    <input id="txtSubjectPerDay" type="text" class="form-control" maxlength="1" max="10" onkeyup="updateTotalHours();" onkeypress="return isNumber(event)"/>
+                </div>
+                <div class="col-sm-2">
+                    Total Subject.<i style="color: red; font-weight:bolder; font-size:medium;">*</i>
+                </div>
+                <div class="col-sm-2">
+                    <input id="txtTotalSubject" type="text" class="form-control" maxlength="2" onkeypress="return isNumber(event)"/>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-sm-12">
+                    <p id="txtTotalHours" style="font-size:medium; font-weight:bolder; color:red;"></p>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-sm-2 pull-right">
+                    <button type="button" id="btnSubmit" class="btn btn-success form-control">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}

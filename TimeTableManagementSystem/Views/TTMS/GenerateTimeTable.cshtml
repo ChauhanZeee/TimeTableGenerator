@@ -1,0 +1,129 @@
+﻿
+@{
+    ViewBag.Title = "GenerateTimeTable";
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#btnGenerate").click(function () {
+
+            var TotalSubject = '@HttpContext.Current.Session["TotalSubjects"]';
+            for (var i = 0; i < TotalSubject; i++) {
+                if ($("#txtSubjectName" + i + "").val().trim() == "") {
+                    alert('Please enter All Subject Name.');
+                    return;
+                }
+                if ($("#txtSubjectHour" + i + "").val().trim() == "" || parseInt($("#txtSubjectHour" + i + "").val().trim()) <= 0) {
+                    alert('Please enter Valid Subject Hours for All subject.');
+                    return;
+                }
+            }
+            var AllSubjectName = "";
+            var AllSubjectHour = "";
+
+            for (var i = 0; i < TotalSubject; i++) {
+                AllSubjectName += $("#txtSubjectName" + i + "").val().trim() + ",";
+                AllSubjectHour += $("#txtSubjectHour" + i + "").val().trim() + ",";
+            }
+
+            AllSubjectName = AllSubjectName.substring(0, AllSubjectName.length - 1);
+            AllSubjectHour = AllSubjectHour.substring(0, AllSubjectHour.length - 1);
+
+            $.ajax({
+                type: "POST",
+                url: '../TTMS/GenerateTimeTable',
+                data: {
+                    AllSubjectName: AllSubjectName,
+                    AllSubjectHour: AllSubjectHour
+                },
+                datatype: "json",
+                success: function (response) {
+
+                    $("#TimeTable").html("");
+
+                    if (response == "2") {
+                        alert('Sum of Subject Entered Hours Should Be Equals to ' + '@HttpContext.Current.Session["TotalHours"]'+ "");
+                        return;
+                    }
+                    else if (response == "0") {
+                        alert('Error in Generating TimeTable.');
+                        return;
+                    }
+                    else {
+
+                        var dtTimeTable = JSON.parse(response.state);
+                        if (dtTimeTable.length === 0) {
+                            $("#TimeTable").html("<p>No data available</p>");
+                            return;
+                        }
+
+                        var tableHTML = "<table border='1' class='table table-bordered'><thead><tr>";
+
+                        var columns = Object.keys(dtTimeTable[0]);
+                        columns.forEach(function (col) {
+                            tableHTML += "<th>" + col + "</th>";
+                        });
+                        tableHTML += "</tr></thead><tbody>";
+
+                        dtTimeTable.forEach(function (row) {
+                            tableHTML += "<tr>";
+                            columns.forEach(function (col) {
+                                tableHTML += "<td>" + row[col] + "</td>";
+                            });
+                            tableHTML += "</tr>";
+                        });
+
+                        tableHTML += "</tbody></table>";
+
+                        $("#TimeTable").html(tableHTML);
+                    }
+                }
+            })
+
+        })
+    })
+
+</script>
+
+<script>
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode == 8 || charCode == 46) {
+            return true;
+        }
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        if (charCode < 48 || charCode > 57) {
+            return false;
+        }
+        return true;
+    }
+</script>
+
+<br />
+
+@using (Html.BeginForm())
+{
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-body">
+                @Html.Raw(@ViewBag.TimeTableGeneratorHtml)
+                
+                <br />
+
+                <div class="row">
+                    <div id="TimeTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
