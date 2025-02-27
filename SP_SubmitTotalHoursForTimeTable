@@ -1,0 +1,21 @@
+                               
+CREATE PROCEDURE SP_SubmitTotalHoursForTimeTable                                   
+                                 
+ @WorkingDayPerWeek int,                                  
+ @SubjectPerday int,                                  
+ @TotalSubjects INT                                
+                             
+AS                                  
+BEGIN           
+  
+DECLARE @TotalHour int = @WorkingDayPerWeek * @SubjectPerday  
+          
+        INSERT INTO TimeTable   
+  (WorkingDayPerWeek, SubjectPerday, TotalSubjects, isActive, TotalHours)  
+  values  
+  (@WorkingDayPerWeek, @SubjectPerday, @TotalSubjects, 1, @TotalHour)  
+  
+  SELECT top 1 * from TimeTable where isactive = 1 order by ID desc   
+            
+END  
+  
