@@ -1,0 +1,23 @@
+                               
+CREATE PROCEDURE SP_GenerateTimeTable                                   
+                                 
+ @SubjectName nvarchar(max),                                  
+ @SubjectHour int                              
+                             
+AS                                  
+BEGIN           
+  
+  
+          
+        INSERT INTO GenerateTimeTable   
+  (SubjectName, SubjectHour, isActive)  
+  values  
+  (@SubjectName, @SubjectHour, 1)  
+  
+  Select SubjectName,SubjectHour from GenerateTimeTable where isactive = 1  
+  
+      
+END  
+
+  
+  
