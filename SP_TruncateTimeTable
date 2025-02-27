@@ -1,0 +1,13 @@
+                                 
+CREATE procedure SP_TruncateTimeTable                                     
+                               
+ @isActive int                               
+                               
+AS                                    
+BEGIN             
+  update GenerateTimeTable set isactive = @isActive    
+  
+  select 1  
+    
+END    
+    
